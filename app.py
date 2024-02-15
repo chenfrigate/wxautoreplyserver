@@ -75,6 +75,7 @@ def weixin():
                 print(reply)
                 response = make_response(reply)
                 response.content_type = 'application/xml'
+                print(response)
                 return response
             else:
                 return "success"
