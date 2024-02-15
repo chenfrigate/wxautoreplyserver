@@ -48,6 +48,7 @@ def weixin():
         # 根据消息类型进行处理
         if msg_type == 'text':
             content = xml_rec.find('Content').text
+            print(content)
             headers = {
                 'accept': 'application/json',
                 'Authorization': PROXY_SECRET,  # 使用环境变量中的 PROXY_SECRET
@@ -63,10 +64,12 @@ def weixin():
                 "model": "gpt-4",
                 "stream": False
             }
-            response = requests.post(WEBSERVICE_URL+"/v1/chat/completions", headers=headers, data=json.dumps(data))  # 使用环境变量中的 WEBSERVICE_URL
+            print(data)
+            response = requests.post(WEBSERVICE_URL+"/v1/chat/completions", headers=headers, data)  # 使用环境变量中的 WEBSERVICE_URL
             # step 3 和 step 4: 接收 webservice 的响应并返回给微信服务器...   
             if response.status_code == 200:
                 reply = f"<xml><ToUserName><![CDATA[{from_user}]]></ToUserName><FromUserName><![CDATA[{to_user}]]></FromUserName><CreateTime>{int(time.time())}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[你好，你发送的消息是: {content}]]></Content></xml>"
+                print(reply)
                 response = make_response(reply)
                 response.content_type = 'application/xml'
                 return response
