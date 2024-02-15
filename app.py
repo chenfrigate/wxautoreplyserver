@@ -1,11 +1,15 @@
 import os
 import requests
+import logging
 from flask import Flask, request, make_response
 import hashlib
 import xml.etree.ElementTree as ET
 import time
 
 app = Flask(__name__)
+
+# 配置日志
+logging.basicConfig(level=logging.DEBUG)  # 设置日志等级为 DEBUG
 
 # 使用 os.environ.get('环境变量名称') 来获取环境变量
 WEIXIN_TOKEN = os.environ.get('WEIXIN_TOKEN')
