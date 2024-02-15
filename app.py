@@ -67,7 +67,7 @@ def weixin():
             }
             print(data)
             response = requests.post(WEBSERVICE_URL+"/v1/chat/completions", headers=headers, data=json.dumps(data))  # 使用环境变量中的 WEBSERVICE_URL
-            print(response.choices[0].message.content)
+            print(response.text)
             # step 3 和 step 4: 接收 webservice 的响应并返回给微信服务器...   
             if response.status_code == 200:
                 reply = f"<xml><ToUserName><![CDATA[{from_user}]]></ToUserName><FromUserName><![CDATA[{to_user}]]></FromUserName><CreateTime>{int(time.time())}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[你好，你发送的消息是: {content}]]></Content></xml>"
