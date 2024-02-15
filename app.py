@@ -63,7 +63,7 @@ def weixin():
                     }
                 ],
                 "model": "gpt-4",
-                "stream": false
+                "stream": False
             }
             print(data)
             response = requests.post(WEBSERVICE_URL+"/v1/chat/completions", headers=headers, data=json.dumps(data))  # 使用环境变量中的 WEBSERVICE_URL
