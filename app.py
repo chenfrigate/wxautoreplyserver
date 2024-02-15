@@ -38,24 +38,28 @@ def weixin():
             return make_response("Verification failed")
     else:
         # step 1: 接收微信消息
-        data = request.get_data()
-        
-        # step 2: 将消息和 PROXY_SECRET 发送到指定的 webservice
+        wx_message_data = request.get_data().decode('utf-8')
+        # step 2: 构建请求发送到webservice
         headers = {
-            'Content-Type': 'application/xml',
-            'Proxy-Secret': PROXY_SECRET  # 假设 webservice 使用自定义头 'Proxy-Secret' 进行认证
+            'accept': 'application/json',
+            'Authorization': PROXY_SECRET,  # 使用环境变量中的 PROXY_SECRET
+            'Content-Type': 'application/json'
         }
-        response = requests.post(WEBSERVICE_URL, data=data, headers=headers)
-        
-        # step 3: 接收 webservice 的响应
-        # 确保 webservice 返回的是微信期望的 XML 格式
-        
-        # step 4: 将这个响应返回给微信服务器
+        data = {
+            "messages": [
+                {
+                    "content": wx_message_data,  # 微信消息作为内容发送
+                    "role": "user"
+                }
+            ],
+            "model": "gpt-4",
+            "stream": False
+        }
+        response = requests.post(WEBSERVICE_URL+"/v1/chat/completions", headers=headers, data=json.dumps(data))  # 使用环境变量中的 WEBSERVICE_URL
+        # step 3 和 step 4: 接收 webservice 的响应并返回给微信服务器...
         if response.status_code == 200:
-            # 确定 ContentType 是正确的，因为微信服务器对响应格式有明确要求
             return response.text, response.status_code, {'Content-Type': 'application/xml'}
         else:
-            # 如果 webservice 响应错误，你可以决定如何处理
             return "success"
 
 if __name__ == '__main__':
