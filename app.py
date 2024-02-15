@@ -38,30 +38,40 @@ def weixin():
         else:
             return make_response("Verification failed")
     else:
-        # step 1: 接收微信消息
-        wx_message_data = request.get_data().decode('utf-8')
-        # step 2: 构建请求发送到webservice
-        headers = {
-            'accept': 'application/json',
-            'Authorization': PROXY_SECRET,  # 使用环境变量中的 PROXY_SECRET
-            'Content-Type': 'application/json'
-        }
-        data = {
-            "messages": [
-                {
-                    "content": wx_message_data,  # 微信消息作为内容发送
-                    "role": "user"
-                }
-            ],
-            "model": "gpt-4",
-            "stream": False
-        }
-        response = requests.post(WEBSERVICE_URL+"/v1/chat/completions", headers=headers, data=json.dumps(data))  # 使用环境变量中的 WEBSERVICE_URL
-        # step 3 和 step 4: 接收 webservice 的响应并返回给微信服务器...
-        if response.status_code == 200:
-            return response.text, response.status_code, {'Content-Type': 'application/xml'}
-        else:
-            return "success"
+        # 处理接收到的用户消息
+        xml_rec = request.stream.read()
+        xml_rec = ET.fromstring(xml_rec)
+        to_user = xml_rec.find('ToUserName').text
+        from_user = xml_rec.find('FromUserName').text
+        msg_type = xml_rec.find('MsgType').text
+        
+        # 根据消息类型进行处理
+        if msg_type == 'text':
+            content = xml_rec.find('Content').text
+            headers = {
+                'accept': 'application/json',
+                'Authorization': PROXY_SECRET,  # 使用环境变量中的 PROXY_SECRET
+                'Content-Type': 'application/json'
+            }
+            data = {
+                "messages": [
+                    {
+                        "content": content,  # 微信消息作为内容发送
+                        "role": "user"
+                    }
+                ],
+                "model": "gpt-4",
+                "stream": False
+            }
+            response = requests.post(WEBSERVICE_URL+"/v1/chat/completions", headers=headers, data=json.dumps(data))  # 使用环境变量中的 WEBSERVICE_URL
+            # step 3 和 step 4: 接收 webservice 的响应并返回给微信服务器...   
+            if response.status_code == 200:
+                reply = f"<xml><ToUserName><![CDATA[{from_user}]]></ToUserName><FromUserName><![CDATA[{to_user}]]></FromUserName><CreateTime>{int(time.time())}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[你好，你发送的消息是: {response}]]></Content></xml>"
+                response = make_response(reply)
+                response.content_type = 'application/xml'
+                return response
+            else:
+                return "success"
 
 if __name__ == '__main__':
     app.run()
