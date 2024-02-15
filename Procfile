@@ -1,1 +1,1 @@
-gunicorn -w 4 -b :10000 app:app
+gunicorn -w 1 -b :10000 app:app
