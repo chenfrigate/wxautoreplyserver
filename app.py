@@ -31,28 +31,6 @@ def weixin():
             return make_response(echostr)
         else:
             return make_response("Verification failed")
-    """
-    else:
-        # 处理接收到的用户消息
-        xml_rec = request.stream.read()
-        xml_rec = ET.fromstring(xml_rec)
-        to_user = xml_rec.find('ToUserName').text
-        from_user = xml_rec.find('FromUserName').text
-        msg_type = xml_rec.find('MsgType').text
-        
-        # 根据消息类型进行处理
-        if msg_type == 'text':
-            content = xml_rec.find('Content').text
-            reply = f"<xml><ToUserName><![CDATA[{from_user}]]></ToUserName><FromUserName><![CDATA[{to_user}]]></FromUserName><CreateTime>{int(time.time())}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[你好，你发送的消息是: {content}]]></Content></xml>"
-            
-            response = make_response(reply)
-            response.content_type = 'application/xml'
-            return response
-        # 可以添加更多消息类型的处理逻辑
-        # ...
-
-    return "success"  
-    """
     else:
         # step 1: 接收微信消息
         data = request.get_data()
