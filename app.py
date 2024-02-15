@@ -13,6 +13,7 @@ WEIXIN_APPID = os.environ.get('WEIXIN_APPID')
 WEIXIN_APPSECRET = os.environ.get('WEIXIN_APPSECRET')
 WEBSERVICE_TOKEN = os.environ.get('WEBSERVICE_TOKEN')
 WEBSERVICE_URL = os.environ.get('WEBSERVICE_URL')
+PROXY_SECRET = os.environ.get('PROXY_SECRET')  # 从环境变量获取 PROXY_SECRET
 
 @app.route('/weixin', methods=['GET', 'POST'])
 def weixin():
@@ -35,10 +36,10 @@ def weixin():
         # step 1: 接收微信消息
         data = request.get_data()
         
-        # step 2: 将消息和token发送到指定的 webservice
+        # step 2: 将消息和 PROXY_SECRET 发送到指定的 webservice
         headers = {
             'Content-Type': 'application/xml',
-            'Authorization': f'Bearer {WEBSERVICE_TOKEN}'  # 假设 webservice 使用 Bearer token 认证
+            'Proxy-Secret': PROXY_SECRET  # 假设 webservice 使用自定义头 'Proxy-Secret' 进行认证
         }
         response = requests.post(WEBSERVICE_URL, data=data, headers=headers)
         
@@ -47,7 +48,8 @@ def weixin():
         
         # step 4: 将这个响应返回给微信服务器
         if response.status_code == 200:
-            return response.text, 200, {'Content-Type': 'application/xml'}
+            # 确定 ContentType 是正确的，因为微信服务器对响应格式有明确要求
+            return response.text, response.status_code, {'Content-Type': 'application/xml'}
         else:
             # 如果 webservice 响应错误，你可以决定如何处理
             return "success"
