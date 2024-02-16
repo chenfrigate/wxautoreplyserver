@@ -50,6 +50,10 @@ def weixin():
         if msg_type == 'text':
             content = xml_rec.find('Content').text
             print(content)
+            reply = f"<xml><ToUserName><![CDATA[{from_user}]]></ToUserName><FromUserName><![CDATA[{to_user}]]></FromUserName><CreateTime>{int(time.time())}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[你好，你发送的消息是: {content}]]></Content></xml>"
+            response = make_response(reply)
+            response.content_type = 'application/xml'
+            return response
             headers = {
                 'accept': 'application/json',
                 'Authorization': PROXY_SECRET,  # 使用环境变量中的 PROXY_SECRET
